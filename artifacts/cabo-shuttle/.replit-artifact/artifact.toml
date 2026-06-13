@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Cabo Shuttle Ride"
+version = "1.0.0"
+id = "artifacts/cabo-shuttle"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19592
+
+[services.development]
+run = "pnpm --filter @workspace/cabo-shuttle run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cabo-shuttle", "run", "build" ]
+publicDir = "artifacts/cabo-shuttle/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19592"
+BASE_PATH = "/"

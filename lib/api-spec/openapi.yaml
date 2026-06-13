@@ -1,0 +1,401 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Cabo Shuttle Ride API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: zones
+    description: Service zones
+  - name: vehicles
+    description: Vehicle types
+  - name: pricing
+    description: Pricing matrix
+  - name: reservations
+    description: Booking reservations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /zones:
+    get:
+      operationId: listZones
+      tags: [zones]
+      summary: List all service zones
+      responses:
+        "200":
+          description: List of zones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Zone"
+
+  /vehicles:
+    get:
+      operationId: listVehicles
+      tags: [vehicles]
+      summary: List all vehicle types
+      responses:
+        "200":
+          description: List of vehicles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vehicle"
+
+  /pricing:
+    get:
+      operationId: listPricing
+      tags: [pricing]
+      summary: Get full pricing matrix
+      parameters:
+        - name: originZoneId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: destinationZoneId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: vehicleId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Pricing records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PricingEntry"
+
+  /reservations:
+    get:
+      operationId: listReservations
+      tags: [reservations]
+      summary: List reservations (admin)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: limit
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of reservations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reservation"
+    post:
+      operationId: createReservation
+      tags: [reservations]
+      summary: Create a new reservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReservationInput"
+      responses:
+        "201":
+          description: Reservation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /reservations/stats:
+    get:
+      operationId: getReservationStats
+      tags: [reservations]
+      summary: Get reservation statistics
+      responses:
+        "200":
+          description: Stats summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReservationStats"
+
+  /reservations/{confirmationCode}:
+    get:
+      operationId: getReservation
+      tags: [reservations]
+      summary: Get reservation by confirmation code
+      parameters:
+        - name: confirmationCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reservation found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /reservations/{confirmationCode}/cancel:
+    patch:
+      operationId: cancelReservation
+      tags: [reservations]
+      summary: Cancel a reservation
+      parameters:
+        - name: confirmationCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Zone:
+      type: object
+      required: [id, name, slug, description, coverImage]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        coverImage:
+          type: string
+        highlights:
+          type: array
+          items:
+            type: string
+
+    Vehicle:
+      type: object
+      required: [id, name, slug, capacity, description, amenities, imageUrl]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        capacity:
+          type: integer
+        description:
+          type: string
+        amenities:
+          type: array
+          items:
+            type: string
+        imageUrl:
+          type: string
+        priceModifier:
+          type: number
+
+    PricingEntry:
+      type: object
+      required: [id, originZoneId, destinationZoneId, vehicleId, priceUsd, durationMinutes]
+      properties:
+        id:
+          type: integer
+        originZoneId:
+          type: integer
+        destinationZoneId:
+          type: integer
+        vehicleId:
+          type: integer
+        priceUsd:
+          type: number
+        durationMinutes:
+          type: integer
+        originZone:
+          $ref: "#/components/schemas/Zone"
+        destinationZone:
+          $ref: "#/components/schemas/Zone"
+        vehicle:
+          $ref: "#/components/schemas/Vehicle"
+
+    ReservationInput:
+      type: object
+      required:
+        - passengerName
+        - passengerEmail
+        - passengerPhone
+        - originZoneId
+        - destinationZoneId
+        - vehicleId
+        - pickupAddress
+        - dropoffAddress
+        - pickupDatetime
+        - passengerCount
+      properties:
+        passengerName:
+          type: string
+        passengerEmail:
+          type: string
+        passengerPhone:
+          type: string
+        originZoneId:
+          type: integer
+        destinationZoneId:
+          type: integer
+        vehicleId:
+          type: integer
+        pickupAddress:
+          type: string
+        dropoffAddress:
+          type: string
+        pickupDatetime:
+          type: string
+        passengerCount:
+          type: integer
+        flightNumber:
+          type: ["string", "null"]
+        specialRequests:
+          type: ["string", "null"]
+
+    Reservation:
+      type: object
+      required:
+        - id
+        - confirmationCode
+        - passengerName
+        - passengerEmail
+        - passengerPhone
+        - originZoneId
+        - destinationZoneId
+        - vehicleId
+        - pickupAddress
+        - dropoffAddress
+        - pickupDatetime
+        - passengerCount
+        - totalPriceUsd
+        - status
+        - createdAt
+      properties:
+        id:
+          type: integer
+        confirmationCode:
+          type: string
+        passengerName:
+          type: string
+        passengerEmail:
+          type: string
+        passengerPhone:
+          type: string
+        originZoneId:
+          type: integer
+        destinationZoneId:
+          type: integer
+        vehicleId:
+          type: integer
+        pickupAddress:
+          type: string
+        dropoffAddress:
+          type: string
+        pickupDatetime:
+          type: string
+        passengerCount:
+          type: integer
+        flightNumber:
+          type: ["string", "null"]
+        specialRequests:
+          type: ["string", "null"]
+        totalPriceUsd:
+          type: number
+        status:
+          type: string
+        createdAt:
+          type: string
+        originZone:
+          $ref: "#/components/schemas/Zone"
+        destinationZone:
+          $ref: "#/components/schemas/Zone"
+        vehicle:
+          $ref: "#/components/schemas/Vehicle"
+
+    ReservationStats:
+      type: object
+      required: [total, confirmed, cancelled, pending, totalRevenue, todayBookings, popularRoute]
+      properties:
+        total:
+          type: integer
+        confirmed:
+          type: integer
+        cancelled:
+          type: integer
+        pending:
+          type: integer
+        totalRevenue:
+          type: number
+        todayBookings:
+          type: integer
+        popularRoute:
+          type: ["string", "null"]
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
