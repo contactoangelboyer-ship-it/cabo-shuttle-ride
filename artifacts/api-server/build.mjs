@@ -120,10 +120,12 @@ async function buildAll() {
   });
 
   // Build 2: handler (Express app only, no .listen()) — used as Vercel serverless function
+  // outdir is required because esbuildPluginPino injects additional entry points
   await esbuild({
     ...BASE_OPTS,
     entryPoints: [path.resolve(artifactDir, "src/app.ts")],
-    outfile: path.resolve(distDir, "handler.mjs"),
+    outdir: distDir,
+    outExtension: { ".js": ".mjs" },
     plugins: [esbuildPluginPino({ transports: [] })],
   });
 }
