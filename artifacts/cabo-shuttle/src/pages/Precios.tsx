@@ -26,7 +26,7 @@ export default function Precios() {
   const zoneTile = (id: string, active: boolean, onClick: () => void, accent?: boolean) => (
     <button
       onClick={onClick}
-      className={`text-left p-4 rounded-2xl border-2 transition-all font-['Poppins'] ${
+      className={`text-left p-4 rounded-2xl border-2 transition-all font-sans ${
         active
           ? accent
             ? "border-[#D4AF37] bg-[#D4AF37]/10 text-[#1C1917]"
@@ -39,7 +39,7 @@ export default function Precios() {
   );
 
   return (
-    <div className="w-full font-['Poppins']">
+    <div className="w-full font-sans">
       {/* Header */}
       <div
         className="relative pt-32 pb-20 px-6 overflow-hidden"

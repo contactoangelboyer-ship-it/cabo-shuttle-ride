@@ -4,7 +4,7 @@ import { useGetReservation, useCancelReservation, getGetReservationQueryKey } fr
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Search, MapPin, Car, Users, Calendar, Plane, FileText,
-  CheckCircle, XCircle, AlertTriangle, Loader2,
+  CheckCircle, XCircle, AlertTriangle, Loader2, MessageCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -61,26 +61,28 @@ export default function MiReserva() {
   }
 
   return (
-    <div className="w-full min-h-screen font-['Poppins']">
-      {/* Header */}
+    <div className="w-full min-h-screen font-sans">
       <div
-        className="relative pt-32 pb-20 px-6 overflow-hidden"
+        className="relative pt-28 sm:pt-32 pb-16 sm:pb-20 px-5 sm:px-6 overflow-hidden"
         style={{ background: "linear-gradient(135deg, #0a0a0a 0%, #111111 60%, #1C1917 100%)" }}
       >
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
         <div className="max-w-2xl mx-auto text-center relative z-10">
-          <h1 className="font-['Unbounded'] text-4xl md:text-5xl font-black text-white mb-3 uppercase tracking-tight">Mi Reserva</h1>
-          <p className="text-white/65 text-lg">Consulta el estado de tu traslado con tu código de confirmación</p>
+          <h1 className="font-['Unbounded'] text-3xl sm:text-4xl md:text-5xl font-black text-white mb-3 uppercase tracking-tight">
+            Mi Reserva
+          </h1>
+          <p className="text-white/65 text-base sm:text-lg">
+            Consulta el estado de tu traslado con tu código de confirmación
+          </p>
         </div>
       </div>
 
-      <div className="bg-[#FAFAF9] py-16">
-        <div className="max-w-2xl mx-auto px-6">
-          {/* Search Form */}
+      <div className="bg-[#FAFAF9] py-14 sm:py-16">
+        <div className="max-w-2xl mx-auto px-5 sm:px-6">
           <motion.form
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             onSubmit={handleSearch}
-            className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 mb-8"
+            className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100 mb-6 sm:mb-8"
           >
             <label className="block text-sm font-bold text-[#1C1917] mb-3">
               Código de Confirmación
@@ -91,15 +93,15 @@ export default function MiReserva() {
                 value={inputCode}
                 onChange={(e) => setInputCode(e.target.value)}
                 placeholder="Ej. CSR-DEMO1"
-                className="h-13 font-mono tracking-wider text-lg flex-1 rounded-2xl border-slate-200 focus:border-[#D4AF37]"
+                className="h-12 font-mono tracking-wider text-base flex-1 rounded-2xl border-slate-200 focus:border-[#D4AF37]"
               />
               <button
                 data-testid="btn-search-reservation"
                 type="submit"
                 disabled={!inputCode.trim()}
-                className="flex items-center gap-2 bg-[#111111] hover:bg-[#1C1917] text-white font-bold px-6 py-3.5 rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 bg-[#111111] hover:bg-[#1C1917] text-white font-bold px-4 sm:px-6 py-3.5 rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
-                <Search className="w-4 h-4" /> Buscar
+                <Search className="w-4 h-4" /> <span className="hidden sm:inline">Buscar</span>
               </button>
             </div>
             <p className="text-xs text-slate-400 mt-3">Formato: CSR-XXXXXX (recibido al confirmar tu reserva)</p>
@@ -114,7 +116,7 @@ export default function MiReserva() {
 
             {isError && !isLoading && (
               <motion.div key="error" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="bg-red-50 border border-red-200 rounded-3xl p-10 text-center"
+                className="bg-red-50 border border-red-200 rounded-3xl p-8 sm:p-10 text-center"
               >
                 <XCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
                 <h3 className="font-black text-red-700 text-xl mb-1">Reserva no encontrada</h3>
@@ -125,28 +127,26 @@ export default function MiReserva() {
             {reservation && !isLoading && (
               <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                  {/* Top */}
                   <div
-                    className="text-white px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    className="text-white px-6 sm:px-8 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4"
                     style={{ background: "linear-gradient(135deg, #0a0a0a 0%, #111111 60%, #1C1917 100%)" }}
                   >
                     <div>
                       <p className="text-white/45 text-xs uppercase tracking-widest mb-1">Código de Confirmación</p>
-                      <p data-testid="result-confirmation-code" className="font-mono font-black text-3xl text-[#D4AF37] tracking-widest">
+                      <p data-testid="result-confirmation-code" className="font-mono font-black text-2xl sm:text-3xl text-[#D4AF37] tracking-widest">
                         {reservation.confirmationCode}
                       </p>
                     </div>
                     <StatusBadge status={reservation.status} />
                   </div>
 
-                  <div className="p-8 space-y-6">
-                    {/* Route */}
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 sm:p-8 space-y-5 sm:space-y-6">
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       {[
                         { label: "ORIGEN", zone: reservation.originZone, addr: reservation.pickupAddress, color: "text-[#1C1917]" },
                         { label: "DESTINO", zone: reservation.destinationZone, addr: reservation.dropoffAddress, color: "text-[#D4AF37]" },
                       ].map((item) => (
-                        <div key={item.label} className="bg-slate-50 rounded-2xl p-4">
+                        <div key={item.label} className="bg-slate-50 rounded-2xl p-3 sm:p-4">
                           <div className={`flex items-center gap-1.5 text-xs font-bold mb-2 ${item.color}`}>
                             <MapPin className="w-3 h-3" /> {item.label}
                           </div>
@@ -156,8 +156,7 @@ export default function MiReserva() {
                       ))}
                     </div>
 
-                    {/* Details */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                       {[
                         { icon: Calendar, label: "Fecha y Hora", val: formatDateTime(reservation.pickupDatetime) },
                         { icon: Car, label: "Vehículo", val: reservation.vehicle?.name },
@@ -183,45 +182,54 @@ export default function MiReserva() {
                       )}
                     </div>
 
-                    {/* Passenger */}
-                    <div className="bg-slate-50 rounded-2xl p-5">
+                    <div className="bg-slate-50 rounded-2xl p-4 sm:p-5">
                       <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Pasajero Principal</div>
                       <div className="font-black text-slate-900">{reservation.passengerName}</div>
                       <div className="text-slate-500 text-sm mt-0.5">{reservation.passengerEmail} · {reservation.passengerPhone}</div>
                     </div>
 
-                    {/* Price & Cancel */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-100">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2 border-t border-slate-100">
                       <div>
                         <div className="text-slate-400 text-xs mb-1">Total a pagar al chofer</div>
-                        <div data-testid="result-total-price" className="text-4xl font-black text-[#1C1917]">
+                        <div data-testid="result-total-price" className="text-3xl sm:text-4xl font-black text-[#1C1917]">
                           ${reservation.totalPriceUsd} <span className="text-sm text-slate-400 font-normal">USD</span>
                         </div>
                       </div>
 
-                      {reservation.status === "confirmed" && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <button data-testid="btn-cancel-reservation" className="flex items-center gap-2 border-2 border-red-200 text-red-600 hover:bg-red-50 font-bold px-5 py-3 rounded-2xl transition-colors text-sm">
-                              <XCircle className="w-4 h-4" /> Cancelar Reserva
-                            </button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-3xl font-['Poppins']">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle className="font-black text-[#1C1917]">Cancelar Reserva</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Esta acción es irreversible. Tu traslado {reservation.confirmationCode} será cancelado. ¿Deseas continuar?
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel className="rounded-xl">No, conservar</AlertDialogCancel>
-                              <AlertDialogAction onClick={handleCancel} className="bg-red-600 hover:bg-red-700 rounded-xl">
-                                {cancelReservation.isPending ? "Cancelando..." : "Confirmar Cancelación"}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
+                        <a
+                          href={`https://wa.me/526241234567?text=Hola%2C%20tengo%20la%20reserva%20${reservation.confirmationCode}%20y%20necesito%20ayuda`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-3 rounded-2xl transition-colors text-sm"
+                        >
+                          <MessageCircle className="w-4 h-4" /> WhatsApp
+                        </a>
+
+                        {reservation.status === "confirmed" && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button data-testid="btn-cancel-reservation" className="flex items-center gap-2 border-2 border-red-200 text-red-600 hover:bg-red-50 font-bold px-4 sm:px-5 py-3 rounded-2xl transition-colors text-sm">
+                                <XCircle className="w-4 h-4" /> Cancelar
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-3xl font-sans">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="font-black text-[#1C1917]">Cancelar Reserva</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción es irreversible. Tu traslado {reservation.confirmationCode} será cancelado. ¿Deseas continuar?
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="rounded-xl">No, conservar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleCancel} className="bg-red-600 hover:bg-red-700 rounded-xl">
+                                  {cancelReservation.isPending ? "Cancelando..." : "Confirmar Cancelación"}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -7,7 +7,6 @@ import NotFound from "@/pages/not-found";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
-// Pages
 import Home from "./pages/Home";
 import Zonas from "./pages/Zonas";
 import Flota from "./pages/Flota";
@@ -15,6 +14,9 @@ import Precios from "./pages/Precios";
 import Reservar from "./pages/Reservar";
 import MiReserva from "./pages/MiReserva";
 import Admin from "./pages/Admin";
+import Nosotros from "./pages/Nosotros";
+import Contacto from "./pages/Contacto";
+import FAQ from "./pages/FAQ";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,9 @@ function Router() {
       <Route path="/precios" component={Precios} />
       <Route path="/reservar" component={Reservar} />
       <Route path="/mi-reserva" component={MiReserva} />
+      <Route path="/nosotros" component={Nosotros} />
+      <Route path="/contacto" component={Contacto} />
+      <Route path="/faq" component={FAQ} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
