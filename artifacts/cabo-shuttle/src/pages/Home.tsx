@@ -1,402 +1,517 @@
-import { motion } from "framer-motion";
 import { Link } from "wouter";
+import BookingWidget from "../components/BookingWidget";
 import {
-  ArrowRight, Shield, Clock, Star, ChevronRight, MapPin,
-  MessageCircle, CheckCircle, Quote
+  Shield, Clock, Star, Globe, ArrowRight, CheckCircle2,
+  MessageCircle, Users, Plane, MapPin, Car
 } from "lucide-react";
-import BookingWidget from "@/components/BookingWidget";
-import { useListZones } from "@workspace/api-client-react";
 
-const ZONE_IMAGES: Record<string, string> = {
-  "aeropuerto": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=900&q=80&auto=format&fit=crop",
-  "san-jose-del-cabo": "https://images.unsplash.com/photo-1600618528240-fb9fc964b853?w=900&q=80&auto=format&fit=crop",
-  "corredor-turistico": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=80&auto=format&fit=crop",
-  "cabo-san-lucas": "https://images.unsplash.com/photo-1512813195386-6cf811ad3542?w=900&q=80&auto=format&fit=crop",
-  "todos-santos": "https://images.unsplash.com/photo-1531761535209-180857e963b9?w=900&q=80&auto=format&fit=crop",
-};
+const GOLD = "#C8971A";
+const DARK = "#0B1628";
+
+const HERO_IMG =
+  "https://images.unsplash.com/photo-1512813195386-6cf811ad3542?w=1920&q=85&auto=format&fit=crop";
+
+const FLEET = [
+  {
+    name: "Sedán Ejecutivo",
+    img: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&q=80&auto=format&fit=crop",
+    capacity: "1–3 pasajeros",
+    luggage: "2 maletas",
+    examples: "Toyota Camry, Nissan Altima",
+    from: "45",
+  },
+  {
+    name: "SUV de Lujo",
+    img: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=800&q=80&auto=format&fit=crop",
+    capacity: "1–6 pasajeros",
+    luggage: "4 maletas",
+    examples: "Chevrolet Suburban, Ford Expedition",
+    from: "65",
+    featured: true,
+  },
+  {
+    name: "Van / Sprinter",
+    img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80&auto=format&fit=crop",
+    capacity: "7–14 pasajeros",
+    luggage: "8+ maletas",
+    examples: "Mercedes Sprinter, Transit",
+    from: "95",
+  },
+];
+
+const DESTINATIONS = [
+  {
+    name: "Aeropuerto SJD",
+    desc: "Recepción en sala de llegadas con letrero personalizado",
+    img: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80&auto=format&fit=crop",
+    time: "0 km",
+  },
+  {
+    name: "Cabo San Lucas",
+    desc: "El Arco, Marina, Médano, hoteles y centros nocturnos",
+    img: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=800&q=80&auto=format&fit=crop",
+    time: "45 min",
+  },
+  {
+    name: "San José del Cabo",
+    desc: "Zona hotelera, centro histórico y galería de arte",
+    img: "https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=800&q=80&auto=format&fit=crop",
+    time: "20 min",
+  },
+  {
+    name: "Corredor Turístico",
+    desc: "Hoteles de lujo entre SJD y Cabo, playas privadas",
+    img: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=80&auto=format&fit=crop",
+    time: "30 min",
+  },
+];
+
+const TRUST = [
+  { icon: Shield, title: "Seguro y Verificado", desc: "Choferes con licencia federal, vehículos asegurados y GPS activo en todo momento." },
+  { icon: Clock, title: "Puntualidad 100%", desc: "Monitoreamos tu vuelo en tiempo real. Ajustamos la llegada si hay retraso." },
+  { icon: Globe, title: "Choferes Bilingües", desc: "Todo nuestro equipo habla inglés y español. Comunicación sin barreras." },
+  { icon: Star, title: "4.9 ★ Calificación", desc: "Más de 3,000 traslados y cientos de reseñas de 5 estrellas en Google." },
+];
+
+const STEPS = [
+  { n: "01", title: "Selecciona tu ruta", desc: "Elige origen, destino, fecha y tipo de vehículo. Sin registro, sin complicaciones." },
+  { n: "02", title: "Confirma tu reserva", desc: "Recibe confirmación inmediata por correo y WhatsApp con todos los detalles." },
+  { n: "03", title: "Disfruta tu llegada", desc: "Tu chofer te espera con letrero personalizado. Sin filas, sin estrés." },
+];
 
 const TESTIMONIALS = [
   {
     name: "Sarah M.",
-    origin: "San Diego, CA",
-    text: "El chofer llegó justo a tiempo al aeropuerto, el auto estaba impecable y con agua fría. Fue la mejor forma de empezar nuestras vacaciones en Los Cabos.",
-    rating: 5,
+    origin: "Los Ángeles, CA",
+    text: "Perfectamente puntual. El chofer estaba esperando en sala de llegadas con nuestros nombres. El Suburban era impecable. Lo usaremos cada vez que visitemos Los Cabos.",
+    stars: 5,
   },
   {
     name: "Carlos R.",
     origin: "Ciudad de México",
-    text: "Reservé un Sprinter para toda la familia. El servicio fue puntual, profesional y el chofer conocía perfectamente todas las rutas. Los recomiendo al 100%.",
-    rating: 5,
+    text: "Reservé para un grupo de 8 personas con el Sprinter. Precio muy competitivo, vehículo limpio y el chofer super amable. Totalmente recomendado.",
+    stars: 5,
   },
   {
-    name: "Jennifer L.",
+    name: "Jennifer T.",
     origin: "Houston, TX",
-    text: "Usé Cabo Shuttle Ride tres veces durante mi semana en Los Cabos. Siempre puntuales, siempre amables. Sin duda es la opción premium de transporte en la zona.",
-    rating: 5,
-  },
-];
-
-const GALLERY = [
-  {
-    src: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=600&q=80&auto=format&fit=crop",
-    label: "El Arco de Cabo San Lucas",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80&auto=format&fit=crop",
-    label: "Playa Médano",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=600&q=80&auto=format&fit=crop",
-    label: "El Corredor Turístico",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600618528240-fb9fc964b853?w=600&q=80&auto=format&fit=crop",
-    label: "Centro de San José del Cabo",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&q=80&auto=format&fit=crop",
-    label: "Aeropuerto Internacional SJD",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1531761535209-180857e963b9?w=600&q=80&auto=format&fit=crop",
-    label: "Todos Santos",
+    text: "Cuando nuestro vuelo llegó tarde, el chofer esperó sin problema. Comunicación excelente por WhatsApp todo el tiempo. Servicio de primera clase.",
+    stars: 5,
   },
 ];
 
 export default function Home() {
-  const { data: zones } = useListZones();
-
   return (
-    <div className="w-full font-sans">
-      {/* ── HERO ── */}
+    <main className="font-sans overflow-x-hidden" style={{ color: "#111827" }}>
+
+      {/* ── HERO ─────────────────────────────────────────────── */}
       <section
-        className="relative min-h-screen flex flex-col overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #0a0a0a 0%, #111111 55%, #1C1917 100%)" }}
+        className="relative flex flex-col justify-end"
+        style={{ minHeight: "100vh" }}
       >
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1920&q=85&auto=format&fit=crop"
-            alt="Los Cabos"
-            className="w-full h-full object-cover object-center"
-            loading="eager"
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(10,10,10,0.88) 0%, rgba(17,17,17,0.80) 55%, rgba(28,25,23,0.76) 100%)",
-            }}
-          />
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: "radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px)",
-              backgroundSize: "28px 28px",
-            }}
-          />
-        </div>
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url('${HERO_IMG}')` }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(105deg, rgba(11,22,40,0.92) 0%, rgba(11,22,40,0.72) 55%, rgba(11,22,40,0.40) 100%)",
+          }}
+        />
 
-        <div className="h-20" />
-
-        <div className="relative z-10 flex-1 flex flex-col justify-center px-5 max-w-7xl mx-auto w-full py-12 sm:py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-2xl mb-10"
-          >
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-              <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-              <span className="text-white text-xs font-semibold tracking-wide uppercase">
-                Los Cabos #1 Traslado Privado
-              </span>
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-5 sm:px-6 pt-32 pb-12 sm:pb-16">
+          <div className="max-w-xl mb-10">
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest mb-6"
+              style={{
+                background: "rgba(200,151,26,0.18)",
+                border: "1px solid rgba(200,151,26,0.40)",
+                color: GOLD,
+              }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
+              Traslados Privados · Los Cabos
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-['Unbounded'] font-black leading-[1.05] tracking-tight text-white mb-5 uppercase">
-              Tu Traslado,{" "}
-              <br />
-              <span
-                className="text-[#D4AF37]"
-                style={{ textShadow: "0 0 40px rgba(212,175,55,0.35)" }}
-              >
-                Sin Complicaciones.
-              </span>
+            <h1
+              className="font-extrabold text-white leading-tight mb-5"
+              style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)", letterSpacing: "-0.02em" }}
+            >
+              Tu llegada a Los Cabos,{" "}
+              <span style={{ color: GOLD }}>perfecta.</span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-white/75 font-medium leading-relaxed max-w-xl">
-              Choferes certificados, vehículos de lujo y puntualidad garantizada. Reserva en 60 segundos y llega relajado a tu destino.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <BookingWidget />
-          </motion.div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="relative z-10 flex flex-wrap justify-center gap-2 sm:gap-3 pb-8 sm:pb-10 px-5"
-        >
-          {["Choferes Bilingues", "Vehículos Asegurados", "Monitoreo de Vuelos", "Sin Cargos Ocultos"].map((t) => (
-            <div
-              key={t}
-              className="flex items-center gap-2 bg-white/8 border border-white/15 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full"
+            <p
+              className="leading-relaxed mb-8"
+              style={{ fontSize: "clamp(0.95rem, 2vw, 1.1rem)", color: "rgba(255,255,255,0.72)" }}
             >
-              <CheckCircle className="w-3.5 h-3.5 text-[#D4AF37] flex-shrink-0" />
-              <span className="text-white/80 text-xs font-medium">{t}</span>
-            </div>
-          ))}
-        </motion.div>
-      </section>
-
-      {/* ── WHY US ── */}
-      <section className="py-20 sm:py-24 bg-[#FAFAF9]">
-        <div className="max-w-7xl mx-auto px-5 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <p className="text-[#D4AF37] font-bold text-xs uppercase tracking-widest mb-3">
-              Por Qué Elegirnos
+              Choferes certificados, vehículos premium y puntualidad garantizada.
+              Disponible 24/7 en aeropuerto SJD y toda la Riviera de Los Cabos.
             </p>
-            <h2 className="font-['Unbounded'] text-3xl sm:text-4xl md:text-5xl font-black text-[#1C1917] leading-tight uppercase tracking-tight">
-              La Diferencia <span className="text-[#D4AF37]">Cabo Shuttle</span>
-            </h2>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/reservar"
+                className="inline-flex items-center gap-2 font-bold rounded-full px-6 py-3 transition-all"
+                style={{
+                  background: GOLD,
+                  color: "#ffffff",
+                  fontSize: "0.95rem",
+                  boxShadow: "0 4px 24px rgba(200,151,26,0.40)",
+                }}
+              >
+                Reservar Ahora <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a
+                href="https://wa.me/526241234567?text=Hola%2C%20quisiera%20información%20sobre%20traslados%20en%20Los%20Cabos"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 font-bold rounded-full px-6 py-3 transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.10)",
+                  border: "1px solid rgba(255,255,255,0.28)",
+                  color: "#ffffff",
+                  fontSize: "0.95rem",
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                <MessageCircle className="w-4 h-4" /> WhatsApp
+              </a>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-            {[
-              {
-                icon: Shield,
-                title: "Viaje Seguro",
-                desc: "Choferes bilingues certificados, vehículos asegurados y monitoreo en tiempo real para tu tranquilidad total.",
-              },
-              {
-                icon: Clock,
-                title: "Puntualidad Perfecta",
-                desc: "Monitoreamos tu vuelo. Si se retrasa o adelanta, ajustamos el horario. Siempre te estaremos esperando.",
-              },
-              {
-                icon: Star,
-                title: "Servicio Premium",
-                desc: "Vehículos inmaculados, aire acondicionado perfecto y agua fría a bordo. Relájate desde el primer momento.",
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/60 border border-slate-100 hover:-translate-y-1 transition-transform duration-300"
-              >
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#111111] flex items-center justify-center mb-5 sm:mb-6">
-                  <item.icon className="w-6 h-6 sm:w-7 sm:h-7 text-[#D4AF37]" />
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-[#1C1917] mb-3">{item.title}</h3>
-                <p className="text-slate-500 leading-relaxed text-sm sm:text-base">{item.desc}</p>
-              </motion.div>
+          <BookingWidget />
+
+          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-6">
+            {["Sin Cargos Ocultos", "Choferes Bilingües", "Monitoreo de Vuelos", "Vehículos Asegurados"].map((t) => (
+              <span key={t} className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>
+                <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: GOLD }} />
+                {t}
+              </span>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── STATS ── */}
-      <section
-        className="py-14 sm:py-16"
-        style={{ background: "linear-gradient(135deg, #0a0a0a 0%, #111111 60%, #1C1917 100%)" }}
-      >
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
-          {[
-            { val: "5", label: "Zonas de Servicio" },
-            { val: "4", label: "Vehículos de Lujo" },
-            { val: "+2,000", label: "Viajes Realizados" },
-            { val: "24/7", label: "Disponibilidad" },
-          ].map((s, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-            >
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-[#D4AF37] mb-2">{s.val}</div>
-              <div className="text-white/65 text-xs sm:text-sm font-medium">{s.label}</div>
-            </motion.div>
-          ))}
+      {/* ── TRUST STRIP ──────────────────────────────────────── */}
+      <section className="bg-white py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {TRUST.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex flex-col items-start gap-4">
+                <div
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(200,151,26,0.10)" }}
+                >
+                  <Icon className="w-5 h-5" style={{ color: GOLD }} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base mb-1.5" style={{ color: "#111827" }}>{title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: "#6B7280" }}>{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── ZONES PREVIEW ── */}
-      <section className="py-20 sm:py-24 bg-[#FAFAF9]">
+      {/* ── HOW IT WORKS ─────────────────────────────────────── */}
+      <section className="py-20 sm:py-28" style={{ background: "#F8F7F3" }}>
         <div className="max-w-7xl mx-auto px-5 sm:px-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 sm:mb-12 gap-4">
+          <div className="max-w-2xl mb-14">
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: GOLD }}>
+              Cómo Funciona
+            </p>
+            <h2
+              className="font-extrabold leading-tight"
+              style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)", color: "#111827", letterSpacing: "-0.02em" }}
+            >
+              Tu traslado en 3 pasos
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {STEPS.map((step) => (
+              <div key={step.n}>
+                <div
+                  className="text-7xl font-extrabold mb-4 leading-none select-none"
+                  style={{ color: "rgba(200,151,26,0.14)" }}
+                >
+                  {step.n}
+                </div>
+                <h3 className="font-bold text-lg mb-2" style={{ color: "#111827" }}>{step.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#6B7280" }}>{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FLEET ────────────────────────────────────────────── */}
+      <section className="bg-white py-20 sm:py-28">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
             <div>
-              <p className="text-[#D4AF37] font-bold text-xs uppercase tracking-widest mb-3">
-                Destinos
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: GOLD }}>
+                Nuestra Flota
               </p>
-              <h2 className="text-3xl sm:text-4xl font-black text-[#1C1917]">Cubrimos Todo Los Cabos</h2>
+              <h2
+                className="font-extrabold leading-tight"
+                style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)", color: "#111827", letterSpacing: "-0.02em" }}
+              >
+                Vehículos para cada grupo
+              </h2>
             </div>
             <Link
-              href="/zonas"
-              className="inline-flex items-center gap-2 text-[#1C1917] font-bold text-sm hover:text-[#D4AF37] transition-colors group"
+              href="/flota"
+              className="inline-flex items-center gap-2 text-sm font-bold flex-shrink-0 transition-opacity hover:opacity-70"
+              style={{ color: GOLD }}
             >
-              Ver todas las zonas{" "}
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Ver flota completa <ArrowRight className="w-4 h-4" />
             </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {zones?.slice(0, 4).map((zone, i) => (
-              <motion.div
-                key={zone.id}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group relative rounded-3xl overflow-hidden aspect-[3/4] cursor-pointer"
-              >
-                <img
-                  src={ZONE_IMAGES[zone.slug] || zone.coverImage || ""}
-                  alt={zone.name}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/90 via-[#111111]/30 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
-                  <h4 className="text-white font-bold text-base sm:text-lg leading-tight mb-2">{zone.name}</h4>
-                  <div className="flex items-center gap-1.5 text-[#D4AF37] text-xs font-semibold opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                    <MapPin className="w-3.5 h-3.5" /> Ver detalles
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── GALLERY ── */}
-      <section className="py-20 sm:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-5 sm:px-6">
-          <div className="text-center mb-12">
-            <p className="text-[#D4AF37] font-bold text-xs uppercase tracking-widest mb-3">
-              Los Cabos
-            </p>
-            <h2 className="font-['Unbounded'] text-3xl sm:text-4xl font-black text-[#1C1917] uppercase tracking-tight">
-              Descubre el Paraíso
-            </h2>
-            <p className="text-slate-500 mt-4 max-w-xl mx-auto text-sm sm:text-base">
-              Playas vírgenes, el icónico Arco de Cabo San Lucas, resorts de lujo y el encantador pueblo de Todos Santos. Te llevamos a donde quieras.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-            {GALLERY.map((img, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.96 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.07 }}
-                className={`relative overflow-hidden rounded-2xl sm:rounded-3xl group ${
-                  i === 0 ? "row-span-2" : ""
-                }`}
-                style={{ aspectRatio: i === 0 ? "3/4" : "4/3" }}
-              >
-                <img
-                  src={img.src}
-                  alt={img.label}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <span className="text-white text-xs sm:text-sm font-semibold">{img.label}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ── */}
-      <section className="py-20 sm:py-24 bg-[#FAFAF9]">
-        <div className="max-w-7xl mx-auto px-5 sm:px-6">
-          <div className="text-center mb-12">
-            <p className="text-[#D4AF37] font-bold text-xs uppercase tracking-widest mb-3">
-              Testimonios
-            </p>
-            <h2 className="font-['Unbounded'] text-3xl sm:text-4xl font-black text-[#1C1917] uppercase tracking-tight">
-              Lo Que Dicen Nuestros{" "}
-              <span className="text-[#D4AF37]">Clientes</span>
-            </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white rounded-3xl p-6 sm:p-8 shadow-lg shadow-slate-200/60 border border-slate-100 flex flex-col"
+            {FLEET.map((v) => (
+              <div
+                key={v.name}
+                className="relative rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                style={{
+                  border: v.featured ? `2px solid ${GOLD}` : "1px solid #E5E7EB",
+                  boxShadow: v.featured
+                    ? "0 8px 32px rgba(200,151,26,0.16)"
+                    : "0 2px 16px rgba(0,0,0,0.05)",
+                }}
               >
-                <Quote className="w-8 h-8 text-[#D4AF37]/40 mb-4" />
-                <p className="text-slate-600 leading-relaxed mb-6 flex-1 text-sm sm:text-base">"{t.text}"</p>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-[#1C1917]">{t.name}</div>
-                    <div className="text-xs text-slate-400">{t.origin}</div>
+                {v.featured && (
+                  <div
+                    className="absolute top-3 right-3 z-10 text-xs font-bold px-3 py-1 rounded-full"
+                    style={{ background: GOLD, color: "#fff" }}
+                  >
+                    Más popular
                   </div>
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: t.rating }).map((_, j) => (
-                      <Star key={j} className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />
-                    ))}
-                  </div>
+                )}
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={v.img}
+                    alt={v.name}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                  />
                 </div>
-              </motion.div>
+                <div className="p-6">
+                  <h3 className="font-bold text-lg mb-1" style={{ color: "#111827" }}>{v.name}</h3>
+                  <p className="text-xs mb-4" style={{ color: "#9CA3AF" }}>{v.examples}</p>
+                  <div className="flex flex-wrap gap-4 mb-5">
+                    <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "#6B7280" }}>
+                      <Users className="w-3.5 h-3.5" /> {v.capacity}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "#6B7280" }}>
+                      <Car className="w-3.5 h-3.5" /> {v.luggage}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-5">
+                    <span className="text-xs font-semibold" style={{ color: "#9CA3AF" }}>Desde</span>
+                    <span className="text-2xl font-extrabold" style={{ color: GOLD }}>${v.from}</span>
+                    <span className="text-xs font-semibold" style={{ color: "#9CA3AF" }}>USD</span>
+                  </div>
+                  <Link
+                    href="/reservar"
+                    className="block w-full text-center text-sm font-bold py-3 rounded-xl transition-all"
+                    style={{
+                      background: v.featured ? GOLD : "transparent",
+                      color: v.featured ? "#fff" : GOLD,
+                      border: `1.5px solid ${GOLD}`,
+                    }}
+                  >
+                    Reservar este vehículo
+                  </Link>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section
-        className="py-16 sm:py-20 text-center"
-        style={{ background: "linear-gradient(135deg, #111111 0%, #1C1917 100%)" }}
-      >
-        <div className="max-w-2xl mx-auto px-5 sm:px-6">
-          <h2 className="font-['Unbounded'] text-3xl sm:text-4xl md:text-5xl font-black text-white mb-5 uppercase tracking-tight">
-            Listo para tu{" "}
-            <span className="text-[#D4AF37]">Traslado Perfecto?</span>
+      {/* ── DESTINATIONS ─────────────────────────────────────── */}
+      <section className="py-20 sm:py-28" style={{ background: DARK }}>
+        <div className="max-w-7xl mx-auto px-5 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: GOLD }}>
+                Zonas de Servicio
+              </p>
+              <h2
+                className="font-extrabold text-white leading-tight"
+                style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)", letterSpacing: "-0.02em" }}
+              >
+                Cubrimos toda la Riviera
+              </h2>
+            </div>
+            <Link
+              href="/zonas"
+              className="inline-flex items-center gap-2 text-sm font-bold flex-shrink-0 transition-opacity hover:opacity-70"
+              style={{ color: GOLD }}
+            >
+              Ver todas las zonas <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {DESTINATIONS.map((d) => (
+              <Link
+                key={d.name}
+                href="/zonas"
+                className="group relative rounded-2xl overflow-hidden block"
+                style={{ height: "300px" }}
+              >
+                <img
+                  src={d.img}
+                  alt={d.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(to top, rgba(11,22,40,0.92) 0%, rgba(11,22,40,0.30) 60%, transparent 100%)",
+                  }}
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <MapPin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: GOLD }} />
+                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
+                      {d.time}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-white text-base mb-1">{d.name}</h3>
+                  <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.60)" }}>{d.desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── STATS ────────────────────────────────────────────── */}
+      <section className="bg-white py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+            {[
+              { value: "3,000+", label: "Traslados completados" },
+              { value: "4.9★", label: "Calificación promedio" },
+              { value: "24/7", label: "Disponibilidad garantizada" },
+              { value: "$0", label: "Cargos ocultos" },
+            ].map(({ value, label }) => (
+              <div key={label}>
+                <div
+                  className="font-extrabold leading-none mb-2"
+                  style={{ fontSize: "clamp(1.75rem, 5vw, 2.75rem)", color: GOLD }}
+                >
+                  {value}
+                </div>
+                <div className="text-sm font-medium" style={{ color: "#6B7280" }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ─────────────────────────────────────── */}
+      <section className="py-20 sm:py-28" style={{ background: "#F8F7F3" }}>
+        <div className="max-w-7xl mx-auto px-5 sm:px-6">
+          <div className="max-w-2xl mb-14">
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: GOLD }}>
+              Opiniones Verificadas
+            </p>
+            <h2
+              className="font-extrabold leading-tight"
+              style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)", color: "#111827", letterSpacing: "-0.02em" }}
+            >
+              Lo que dicen nuestros clientes
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t) => (
+              <div
+                key={t.name}
+                className="bg-white rounded-2xl p-7 flex flex-col gap-5"
+                style={{ boxShadow: "0 2px 20px rgba(0,0,0,0.05)", border: "1px solid #E5E7EB" }}
+              >
+                <div className="flex gap-0.5">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-current" style={{ color: GOLD }} />
+                  ))}
+                </div>
+                <p className="text-sm leading-relaxed flex-1" style={{ color: "#374151" }}>
+                  "{t.text}"
+                </p>
+                <div>
+                  <div className="font-bold text-sm" style={{ color: "#111827" }}>{t.name}</div>
+                  <div className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{t.origin}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA BANNER ───────────────────────────────────────── */}
+      <section className="py-20 sm:py-28" style={{ background: DARK }}>
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 text-center">
+          <div
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest mb-6"
+            style={{ background: "rgba(200,151,26,0.15)", border: "1px solid rgba(200,151,26,0.35)", color: GOLD }}
+          >
+            <Plane className="w-3.5 h-3.5" />
+            ¿Próximo viaje a Los Cabos?
+          </div>
+          <h2
+            className="font-extrabold text-white leading-tight mb-5 mx-auto"
+            style={{
+              fontSize: "clamp(1.75rem, 5vw, 3rem)",
+              letterSpacing: "-0.02em",
+              maxWidth: "600px",
+            }}
+          >
+            Reserva tu traslado hoy y viaja sin preocupaciones
           </h2>
-          <p className="text-white/65 text-base sm:text-lg mb-8 sm:mb-10">
-            Reserva en 60 segundos o escríbenos por WhatsApp. Sin complicaciones, sin cargos ocultos.
+          <p
+            className="mb-10 mx-auto"
+            style={{ fontSize: "1rem", color: "rgba(255,255,255,0.55)", maxWidth: "440px" }}
+          >
+            Confirmación inmediata. Sin registro obligatorio. Cancelación flexible.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-wrap justify-center gap-3">
             <Link
               href="/reservar"
-              className="inline-flex items-center justify-center gap-3 bg-[#D4AF37] hover:bg-[#B4941F] text-[#111111] font-black text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 rounded-2xl transition-all hover:scale-[1.03] shadow-[0_0_40px_rgba(212,175,55,0.35)]"
+              className="inline-flex items-center gap-2 font-bold rounded-full px-8 py-3.5 transition-all"
+              style={{
+                background: GOLD,
+                color: "#fff",
+                boxShadow: "0 4px 24px rgba(200,151,26,0.40)",
+                fontSize: "0.95rem",
+              }}
             >
-              Reservar Ahora <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
+              Reservar Ahora <ArrowRight className="w-4 h-4" />
             </Link>
             <a
-              href="https://wa.me/526241234567?text=Hola%2C%20quiero%20información%20sobre%20traslados%20en%20Los%20Cabos"
+              href="https://wa.me/526241234567?text=Hola%2C%20quiero%20información%20sobre%20traslados"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-3 bg-green-600 hover:bg-green-500 text-white font-bold text-base px-8 py-4 rounded-2xl transition-all"
+              className="inline-flex items-center gap-2 font-bold rounded-full px-8 py-3.5 transition-all"
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.20)",
+                color: "#fff",
+                fontSize: "0.95rem",
+              }}
             >
-              <MessageCircle className="w-5 h-5" />
-              WhatsApp
+              <MessageCircle className="w-4 h-4" /> Escribir por WhatsApp
             </a>
           </div>
         </div>
       </section>
-    </div>
+    </main>
   );
 }
